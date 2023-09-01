@@ -1,0 +1,11 @@
+gcc
+%c
+%h
+
+-std=c99
+-Wall
+-Wextra
+-pedantic
+-I./vendor/raylib/src
+-L./vendor/raylib/src
+-lraylib

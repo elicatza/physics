@@ -5,8 +5,8 @@
 #define VEC2D_IMPLEMENTATION
 #include "./vec2d.h"
 
-#define WIDTH 1200
-#define HEIGHT 1200
+#define WIDTH 700
+#define HEIGHT 700
 #define FPS 60
 #define GRAVITY 9.81f
 
@@ -87,7 +87,7 @@ int main(void)
         .vel = (Vec2d) { 100, 100 },
         .acc = (Vec2d) { 0, GRAVITY },
         .friction = 0.17f,
-        .mass = 50,
+        .mass = 25,
         .angle = 10 * PI / 180,
     };
 

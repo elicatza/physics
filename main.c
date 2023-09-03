@@ -26,7 +26,8 @@ typedef struct {
     Vec2d vel;
     Vec2d acc;
     float mass;
-    float friction;
+    float friction_static;
+    float friction_kinetic;
     float angle;
 } Kin;
 
@@ -50,6 +51,18 @@ void kin_draw_square(Kin kin, uint32_t size, float thick, Color color)
     DrawLineEx(ul, ur, thick, color);
 }
 
+void kin_draw_floor(Kin kin, uint32_t size, float thick, Color color)
+{
+    Vec2d rel_r = vec2d_rotate((Vec2d) { size, 0 }, -kin.angle);
+    Vec2d rel_u = vec2d_rotate((Vec2d) { size, 0 }, -kin.angle - PI / 2);
+    Vec2d dl = vec2d_sub(kin.pos, vec2d_scale(vec2d_add(rel_r, rel_u), 0.5));
+
+    Vec2d start = vec2d_add(dl, vec2d_scale(rel_r, -10));
+    Vec2d end = vec2d_add(dl, vec2d_scale(rel_r, 10));
+    DrawLineEx(dl, end, thick, color);
+    DrawLineEx(dl, start, thick, color);
+}
+
 Vec2d kin_force_normal(Kin kin)
 {
     
@@ -64,9 +77,22 @@ Vec2d kin_force_gravity(Kin kin)
     };
 }
 
+Vec2d kin_force_not_friction(Kin kin)
+{
+    return vec2d_add(kin_force_gravity(kin), kin_force_normal(kin));
+}
+
+// Math source: https://en.wikipedia.org/wiki/Friction#Normal_force
 Vec2d kin_force_friction(Kin kin)
 {
-    Vec2d fric = vec2d_scale(kin_force_normal(kin), kin.friction);
+    Vec2d fric = vec2d_scale(kin_force_normal(kin), kin.friction_static);
+    Vec2d notfric = kin_force_not_friction(kin);
+    if (vec2d_length(notfric) < vec2d_length(fric)) {
+        // Not Sliding
+        return vec2d_scale(notfric, -1);
+    }
+
+    // Since there is no motion. Use this to find direction.
     if (fmodf(kin.angle, (2 * PI)) > 0) {
         return vec2d_rotate(fric, 90 * PI / 180);
     }
@@ -75,6 +101,9 @@ Vec2d kin_force_friction(Kin kin)
 
 void draw_arrow(Vec2d base, Vec2d rel, Color color, char *text)
 {
+    if (vec2d_length(rel) == 0) {
+        return;
+    }
     Vec2d tipp = vec2d_add(base, rel);
     Vec2d arrow_rel_tipp = vec2d_scale(vec2d_unitinterval(rel), 16);
     Vec2d arrow_base = vec2d_sub(tipp, arrow_rel_tipp);
@@ -104,23 +133,43 @@ int main(void)
         .pos = (Vec2d) { WIDTH / 2, HEIGHT / 2 },
         .vel = (Vec2d) { 100, 100 },
         .acc = (Vec2d) { 0, GRAVITY },
-        .friction = 0.17f,
+        .friction_static = 0.17f,
+        .friction_kinetic = 0.17f,
         .mass = 25,
         .angle = 10 * PI / 180,
     };
 
     while (!WindowShouldClose()) {
-        if (IsKeyPressed(KEY_C)) {
-            kin.angle -= PI / 180;
-        }
-        if (IsKeyPressed(KEY_V)) {
-            kin.angle += PI / 180;
-        }
-        if (IsKeyPressed(KEY_O)) {
-            camera.rotation = kin.angle * 180 / PI;
+        if (IsKeyPressed(KEY_R)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                kin.angle -= PI / 180;
+            } else {
+                kin.angle += PI / 180;
+            }
         }
 
-        if (IsKeyPressed(KEY_Z) && !IsKeyDown(KEY_LEFT_SHIFT)) {
+        if (IsKeyPressed(KEY_F)) {
+            if (camera.rotation != 0) {
+                camera.rotation = 0;
+            } else {
+                camera.rotation = kin.angle * 180 / PI;
+            }
+        }
+        if (GetMouseWheelMove()) {
+            if (camera.zoom + GetMouseWheelMove() * 0.05 >= 0) {
+                camera.zoom += GetMouseWheelMove() * 0.05;
+            }
+        }
+
+        if (IsKeyPressed(KEY_M)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                kin.friction_static -= 0.01f;
+            } else {
+                kin.friction_static += 0.01f;
+            }
+        }
+        // TODO: Display friction constant and adjust it
+        if (IsKeyPressed(KEY_Z)) {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
                 camera.zoom -= 0.1f;
             } else {
@@ -138,24 +187,22 @@ int main(void)
             BeginMode2D(camera); {
                 ClearBackground(M_BG);
 
-                draw_arrow(kin.pos, vec2d_sum(forces, 3), M_RED, "Sum F");
-                DrawRectanglePro((Rectangle){
-                        .x = kin.pos.x,
-                        .y = kin.pos.y,
-                        .width = 10,
-                        .height = 20,
-                        }, kin.pos, kin.angle, M_PURPLE);
+                kin_draw_square(kin, 200, 5, M_FG);
+                kin_draw_floor(kin, 200, 5, M_FG);
 
                 draw_arrow(kin.pos, kin_force_gravity(kin), M_GREEN, "G");
                 draw_arrow(kin.pos, kin_force_normal(kin), M_BLUE, "N");
+
+                draw_arrow(kin.pos, vec2d_sum(forces, 3), M_RED, "Sum F");
                 draw_arrow(kin.pos, kin_force_friction(kin), M_PURPLE, "R");
-                kin_draw_square(kin, 100, 5, M_FG);
 
             } EndMode2D();
 
-            char angle[32];
-            snprintf(angle, 32, "%.2f", kin.angle * 180 / PI);
-            DrawText(angle, 10, 10, 50, M_BLUE);
+            char buf[32];
+            snprintf(buf, 32, "Angle: %.2f", kin.angle * 180 / PI);
+            DrawText(buf, 10, 10, 50, M_BLUE);
+            snprintf(buf, 32, "Friction: %.2f", kin.friction_static);
+            DrawText(buf, 10, 70, 50, M_BLUE);
 
         } EndDrawing();
     }

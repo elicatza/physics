@@ -95,9 +95,9 @@ Vec2d kin_force_friction(Kin kin)
 
     // Since there is no motion. Use this to find direction.
     if (fmodf(kin.angle, (2 * PI)) > 0) {
-        return vec2d_rotate(fric, 90 * PI / 180);
+        return vec2d_rotate(fric, 90 * DEG2RAD);
     }
-    return vec2d_rotate(fric, -90 * PI / 180);
+    return vec2d_rotate(fric, -90 * DEG2RAD);
 }
 
 void draw_arrow(Vec2d base, Vec2d rel, Color color, char *text)
@@ -137,7 +137,7 @@ int main(void)
         .friction_static = 0.17f,
         .friction_kinetic = 0.17f,
         .mass = 25,
-        .angle = 10 * PI / 180,
+        .angle = 10 * DEG2RAD,
     };
 
     bool hud = false;
@@ -157,7 +157,7 @@ int main(void)
             if (camera.rotation != 0) {
                 camera.rotation = 0;
             } else {
-                camera.rotation = kin.angle * 180 / PI;
+                camera.rotation = kin.angle * RAD2DEG;
             }
         }
         if (GetMouseWheelMove()) {
@@ -207,7 +207,7 @@ int main(void)
                 char buf[32];
                 snprintf(buf, 32, "Friction: %.2f", kin.friction_static);
                 DrawText(buf, 10, 10, 50, M_BLUE);
-                snprintf(buf, 32, "Angle: %.2f", kin.angle * 180 / PI);
+                snprintf(buf, 32, "Angle: %.2f", kin.angle * RAD2DEG);
                 DrawText(buf, 10, 70, 50, M_BLUE);
             }
 

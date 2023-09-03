@@ -139,10 +139,10 @@ int main(void)
         .angle = 10 * PI / 180,
     };
 
-    bool no_hud = false;
+    bool hud = false;
 
     while (!WindowShouldClose()) {
-        if (IsKeyPressed(KEY_SPACE)) no_hud = !no_hud;
+        if (IsKeyPressed(KEY_SPACE)) hud = !hud;
 
         if (IsKeyPressed(KEY_R)) {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
@@ -202,7 +202,7 @@ int main(void)
 
             } EndMode2D();
 
-            if (!no_hud) {
+            if (!hud) {
                 char buf[32];
                 snprintf(buf, 32, "Friction: %.2f", kin.friction_static);
                 DrawText(buf, 10, 10, 50, M_BLUE);

@@ -92,6 +92,14 @@ int main(void)
 {
     InitWindow(WIDTH, HEIGHT, "Physics");
     SetTargetFPS(FPS);
+
+    Camera2D camera = {
+        .zoom = 1.0f,
+        .offset = (Vec2d) {  WIDTH / 2, HEIGHT / 2  },
+        .rotation = 0,
+        .target = (Vec2d) { WIDTH / 2, HEIGHT / 2 },
+    };
+
     Kin kin = {
         .pos = (Vec2d) { WIDTH / 2, HEIGHT / 2 },
         .vel = (Vec2d) { 100, 100 },
@@ -102,43 +110,54 @@ int main(void)
     };
 
     while (!WindowShouldClose()) {
-        BeginDrawing(); {
-            ClearBackground(M_BG);
-            Vec2d forces[] = {
-                kin_force_gravity(kin),
-                kin_force_normal(kin),
-                kin_force_friction(kin),
-            };
-            // VEC2D_PRINT(vec2d_sum(forces, 3));
-
-            // DrawLineEx((Vector2) { 0, HEIGHT }, (Vector2) { WIDTH, HEIGHT }, 5, M_BLUE);
-            // DrawRectangle(0, HEIGHT / 1.5 - HEIGHT / 12.f, WIDTH, HEIGHT / 12.f, M_GREEN);
-            draw_arrow(kin.pos, vec2d_sum(forces, 3), M_RED, "Sum F");
-            DrawRectanglePro((Rectangle){
-                    .x = kin.pos.x,
-                    .y = kin.pos.y,
-                    .width = 10,
-                    .height = 20,
-                    }, kin.pos, kin.angle, M_PURPLE);
-
-            draw_arrow(kin.pos, kin_force_gravity(kin), M_GREEN, "G");
-            draw_arrow(kin.pos, kin_force_normal(kin), M_BLUE, "N");
-            draw_arrow(kin.pos, kin_force_friction(kin), M_PURPLE, "R");
-            kin_draw_square(kin, 100, 5, M_FG);
-
-            char angle[32];
-            snprintf(angle, 32, "%.2f", kin.angle * 180 / PI);
-            DrawText(angle, 10, 10, 50, M_BLUE);
-
-        }
-        EndDrawing();
-
         if (IsKeyPressed(KEY_C)) {
             kin.angle -= PI / 180;
         }
         if (IsKeyPressed(KEY_V)) {
             kin.angle += PI / 180;
         }
+        if (IsKeyPressed(KEY_O)) {
+            camera.rotation = kin.angle * 180 / PI;
+        }
+
+        if (IsKeyPressed(KEY_Z) && !IsKeyDown(KEY_LEFT_SHIFT)) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                camera.zoom -= 0.1f;
+            } else {
+                camera.zoom += 0.1f;
+            }
+        }
+
+        Vec2d forces[] = {
+            kin_force_gravity(kin),
+            kin_force_normal(kin),
+            kin_force_friction(kin),
+        };
+
+        BeginDrawing(); {
+            BeginMode2D(camera); {
+                ClearBackground(M_BG);
+
+                draw_arrow(kin.pos, vec2d_sum(forces, 3), M_RED, "Sum F");
+                DrawRectanglePro((Rectangle){
+                        .x = kin.pos.x,
+                        .y = kin.pos.y,
+                        .width = 10,
+                        .height = 20,
+                        }, kin.pos, kin.angle, M_PURPLE);
+
+                draw_arrow(kin.pos, kin_force_gravity(kin), M_GREEN, "G");
+                draw_arrow(kin.pos, kin_force_normal(kin), M_BLUE, "N");
+                draw_arrow(kin.pos, kin_force_friction(kin), M_PURPLE, "R");
+                kin_draw_square(kin, 100, 5, M_FG);
+
+            } EndMode2D();
+
+            char angle[32];
+            snprintf(angle, 32, "%.2f", kin.angle * 180 / PI);
+            DrawText(angle, 10, 10, 50, M_BLUE);
+
+        } EndDrawing();
     }
 
     CloseWindow();

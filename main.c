@@ -139,7 +139,11 @@ int main(void)
         .angle = 10 * PI / 180,
     };
 
+    bool no_hud = false;
+
     while (!WindowShouldClose()) {
+        if (IsKeyPressed(KEY_SPACE)) no_hud = !no_hud;
+
         if (IsKeyPressed(KEY_R)) {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
                 kin.angle -= PI / 180;
@@ -198,11 +202,13 @@ int main(void)
 
             } EndMode2D();
 
-            char buf[32];
-            snprintf(buf, 32, "Angle: %.2f", kin.angle * 180 / PI);
-            DrawText(buf, 10, 10, 50, M_BLUE);
-            snprintf(buf, 32, "Friction: %.2f", kin.friction_static);
-            DrawText(buf, 10, 70, 50, M_BLUE);
+            if (!no_hud) {
+                char buf[32];
+                snprintf(buf, 32, "Friction: %.2f", kin.friction_static);
+                DrawText(buf, 10, 10, 50, M_BLUE);
+                snprintf(buf, 32, "Angle: %.2f", kin.angle * 180 / PI);
+                DrawText(buf, 10, 70, 50, M_BLUE);
+            }
 
         } EndDrawing();
     }

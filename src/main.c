@@ -1,10 +1,10 @@
 #include <raylib.h>
 #include <raymath.h>
-#include <stdint.h>
 
 #define VEC2D_RAYLIB
 #define VEC2D_IMPLEMENTATION
 #include "./vec2d.h"
+#include "./core.h"
 
 #define WIDTH 750
 #define HEIGHT 750
@@ -26,14 +26,14 @@ typedef struct {
     Vec2d pos;
     Vec2d vel;
     Vec2d acc;
-    float mass;
-    float friction_static;
-    float friction_kinetic;
-    float angle;
+    f32 mass;
+    f32 friction_static;
+    f32 friction_kinetic;
+    f32 angle;
 } Kin;
 
 
-void kin_draw_square(Kin kin, uint32_t size, float thick, Color color)
+void kin_draw_square(Kin kin, u32 size, f32 thick, Color color)
 {
     // Find (r)elative (l)eft and (u)p vector
     Vec2d rel_r = vec2d_rotate((Vec2d) { size, 0 }, -kin.angle);
@@ -52,7 +52,7 @@ void kin_draw_square(Kin kin, uint32_t size, float thick, Color color)
     DrawLineEx(ul, ur, thick, color);
 }
 
-void kin_draw_floor(Kin kin, uint32_t size, float thick, Color color)
+void kin_draw_floor(Kin kin, u32 size, f32 thick, Color color)
 {
     Vec2d rel_r = vec2d_rotate((Vec2d) { size, 0 }, -kin.angle);
     Vec2d rel_u = vec2d_rotate((Vec2d) { size, 0 }, -kin.angle - PI / 2);

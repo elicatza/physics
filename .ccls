@@ -6,6 +6,10 @@ gcc
 -Wall
 -Wextra
 -pedantic
--I./vendor/raylib/src
--L./vendor/raylib/src
+-I/home/eliza/dev/coding/physics/lib/raylib/include
+-L/home/eliza/dev/coding/physics/lib/raylib/lib
 -lraylib
+-lm
+-lglfw
+-lpthread
+-ldl

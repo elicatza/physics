@@ -29,6 +29,7 @@ VEC2DDEF float vec2d_dot(Vec2d u, Vec2d v);
 VEC2DDEF float vec2d_cross(Vec2d u, Vec2d v);
 VEC2DDEF Vec2d vec2d_scale(Vec2d u, float scaler);
 VEC2DDEF float vec2d_length(Vec2d u);
+VEC2DDEF float vec2d_length_sqr(Vec2d u);
 VEC2DDEF Vec2d vec2d_unitinterval(Vec2d u);
 VEC2DDEF Vec2d vec2d_rotate(Vec2d u, float theta);
 VEC2DDEF void vec2d_print(Vec2d vec, const char *name);
@@ -97,7 +98,12 @@ VEC2DDEF Vec2d vec2d_scale(Vec2d u, float scaler)
 
 VEC2DDEF float vec2d_length(Vec2d u)
 {
-    return sqrtf(powf(u.x, 2) + powf(u.y, 2));
+    return sqrtf(u.x * u.x + u.y * u.y);
+}
+
+VEC2DDEF float vec2d_length_sqr(Vec2d u)
+{
+    return u.x * u.x + u.y * u.y;
 }
 
 VEC2DDEF Vec2d vec2d_unitinterval(Vec2d u)

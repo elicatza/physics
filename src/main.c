@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <raymath.h>
 #include <stdint.h>
 
 #define VEC2D_RAYLIB
@@ -87,7 +88,7 @@ Vec2d kin_force_friction(Kin kin)
 {
     Vec2d fric = vec2d_scale(kin_force_normal(kin), kin.friction_static);
     Vec2d notfric = kin_force_not_friction(kin);
-    if (vec2d_length(notfric) < vec2d_length(fric)) {
+    if (vec2d_length_sqr(notfric) < vec2d_length_sqr(fric)) {
         // Not Sliding
         return vec2d_scale(notfric, -1);
     }
@@ -101,7 +102,7 @@ Vec2d kin_force_friction(Kin kin)
 
 void draw_arrow(Vec2d base, Vec2d rel, Color color, char *text)
 {
-    if (vec2d_length(rel) == 0) {
+    if (vec2d_length_sqr(rel) == 0) {
         return;
     }
     Vec2d tipp = vec2d_add(base, rel);

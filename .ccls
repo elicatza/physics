@@ -6,7 +6,7 @@ gcc
 -Wall
 -Wextra
 -pedantic
--I/home/eliza/dev/coding/physics/lib/raylib/include
+-I/home/eliza/dev/coding/physics/lib/raylib/include/
 -L/home/eliza/dev/coding/physics/lib/raylib/lib
 -lraylib
 -lm

@@ -9,20 +9,20 @@
 #endif
 #endif
 
-#include <stdint.h>
-
-#ifdef VEC2D_RAYLIB
+#ifdef VEC2D_WITH_RAYLIB
 #include <raylib.h>
 typedef Vector2 Vec2d;
+
+VEC2DDEF void draw_arrow(Vec2d base, Vec2d rel, Color color, char *text);
 #else
 typedef struct {
     float x;
     float y;
 } Vec2d;
-#endif  /* VEC2D_RAYLIB */
+#endif // VEC2D_WITH_RAYLIB
 
 VEC2DDEF Vec2d vec2d_add(Vec2d u, Vec2d v);
-VEC2DDEF Vec2d vec2d_sum(Vec2d *vecs, uint32_t len);
+VEC2DDEF Vec2d vec2d_sum(Vec2d *vecs, unsigned int len);
 VEC2DDEF Vec2d vec2d_sub(Vec2d u, Vec2d v);
 VEC2DDEF Vec2d vec2d_from_to(Vec2d u, Vec2d v);
 VEC2DDEF float vec2d_dot(Vec2d u, Vec2d v);
@@ -40,7 +40,6 @@ VEC2DDEF void vec2d_print(Vec2d vec, const char *name);
 #ifdef VEC2D_IMPLEMENTATION  /* Implementation goes here */
 #include <math.h>
 #include <stdio.h>
-#include <stdint.h>
 
 
 VEC2DDEF Vec2d vec2d_add(Vec2d u, Vec2d v)
@@ -51,9 +50,9 @@ VEC2DDEF Vec2d vec2d_add(Vec2d u, Vec2d v)
     };
 }
 
-VEC2DDEF Vec2d vec2d_sum(Vec2d *vecs, uint32_t len)
+VEC2DDEF Vec2d vec2d_sum(Vec2d *vecs, unsigned int len)
 {
-    uint32_t i;
+    unsigned int i;
     Vec2d rv = { 0, 0 };
     for (i = 0; i < len; ++i) {
         rv = vec2d_add(rv, vecs[i]);
@@ -137,6 +136,28 @@ VEC2DDEF void vec2d_print(Vec2d vec, const char *name)
 {
     printf("%s = [%.2f, %.2f]\n", name, vec.x, vec.y);
 }
+
+#ifdef VEC2D_WITH_RAYLIB
+#include <raylib.h>
+
+VEC2DDEF void draw_arrow(Vec2d base, Vec2d rel, Color color, char *text)
+{
+    if (vec2d_length_sqr(rel) == 0) {
+        return;
+    }
+    Vec2d tipp = vec2d_add(base, rel);
+    Vec2d arrow_rel_tipp = vec2d_scale(vec2d_unitinterval(rel), 16);
+    Vec2d arrow_base = vec2d_sub(tipp, arrow_rel_tipp);
+
+    // Vec2d k3 = vec2d_add(arrow_base, arrow_rel_tipp);
+    Vec2d k1 = vec2d_add(arrow_base, vec2d_scale(vec2d_rotate(arrow_rel_tipp, PI / 2), 0.66));
+    Vec2d k2 = vec2d_add(arrow_base, vec2d_scale(vec2d_rotate(arrow_rel_tipp, -PI / 2), 0.66));
+
+    DrawTriangle(k2, k1, tipp, color);
+    DrawLineEx(base, arrow_base, 6, color);
+    DrawText(text, tipp.x + 20, tipp.y + 20, 30, color);
+}
+#endif // VEC2D_WITH_RAYLIB
 
 #endif  /* VEC2D_IMPLEMENTATION */
 

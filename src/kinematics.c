@@ -1,8 +1,9 @@
 #include <raylib.h>
 
-#include "kinematics.h"
-
+#define VEC2D_WITH_RAYLIB
 #include "vec2d.h"
+
+#include "kinematics.h"
 #include "core.h"
 #include "math.h"
 
